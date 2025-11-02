@@ -1,5 +1,6 @@
 # ----- VAIHE 1: Rakennusympäristö -----
-FROM debian:bullseye AS builder
+# Käytetään Balenan RPi Zero -yhteensopivaa (armv6) Bullseye-imagea
+FROM balenalib/raspberry-pi-zero-debian:bullseye AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PACKAGE_VERSION=0.0.0-local
