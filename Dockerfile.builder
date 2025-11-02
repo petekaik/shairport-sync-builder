@@ -18,6 +18,11 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     automake \
     libtool \
+    # Autoreconfin/Autotoolsin vaatimat lisätyökalut
+    m4 \
+    gettext \
+    pkg-config \
+    # Shairport-Syncin riippuvuudet
     libpopt-dev \
     libconfig-dev \
     libasound2-dev \
