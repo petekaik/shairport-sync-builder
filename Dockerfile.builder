@@ -1,28 +1,15 @@
-# ----- VAIHE 1: Rakennusympäristö -----
-# Käytetään Balenan RPi Zero -yhteensopivaa (armv6) Bullseye-imagea
-# FROM balenalib/raspberry-pi-zero-debian:bullseye AS builder
-# Käytetään Balenan yleistä ARMv6hf (Raspberry Pi Zero) -pohjaista Debian-imagea
-# FROM balenalib/armv6hf-debian:bullseye AS builder
-# Käytetään virallista Balena Universal Base Imagea (UBI) ARMv6hf-arkkitehtuurille
-# Tämä on vakain julkinen polku Debian Bullseyelle RPi Zero W:tä varten.
-FROM balenalib/aarch64-debian:bullseye AS builder
+# ----- VAIHE 1: Rakennusympäristö (ARMv6hf Build) -----
+# Käytetään Balenan RPi Zero W:n (ARMv6hf) Build-imagea.
+# Tämä image sisältää kaikki kehitystyökalut, mikä ratkaisee autoreconf-virheen.
+FROM balenalib/armv6hf-debian:bullseye-build AS builder 
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PACKAGE_VERSION=0.0.0-local
 
-# Asennetaan shairport-syncin KAIKKI rakennusaikaiset riippuvuudet.
-# TÄHÄN LISÄTTY PYYTÄMÄSI KIRJASTOT
+# Poistettiin turhat asennukset (build-essential, autoconf jne.), 
+# koska ne ovat jo 'build'-imagessa.
 RUN apt-get update && apt-get install -y \
-    build-essential \
     git \
-    autoconf \
-    automake \
-    libtool \
-    # Autoreconfin/Autotoolsin vaatimat lisätyökalut
-    m4 \
-    gettext \
-    pkg-config \
-    # Shairport-Syncin riippuvuudet
     libpopt-dev \
     libconfig-dev \
     libasound2-dev \
@@ -32,7 +19,6 @@ RUN apt-get update && apt-get install -y \
     libsoxr-dev \
     libdaemon-dev \
     libnss-mdns \
-    # PULSEAUDIO JA AIRPLAY2
     xmltoman \
     libpulse-dev \
     libplist-dev \
@@ -41,13 +27,10 @@ RUN apt-get update && apt-get install -y \
     libavutil-dev \
     libavcodec-dev \
     libavformat-dev \
-    # FPM:n riippuvuudet
     ruby \
     rubygems \
+    && gem install fpm \
     && apt-get clean
-
-# Asennetaan FPM (Effing Package Management)
-RUN gem install fpm
 
 # Kopioidaan kaikki lähdekoodi kontin sisään
 WORKDIR /build
@@ -55,10 +38,10 @@ COPY . .
 
 # ----- VAIHE 2: Kääntäminen -----
 
+# Tämä komento toimii nyt Build-imagessa
 RUN autoreconf -i -f
 
-# Ajetaan configure-skripti
-# TÄHÄN LISÄTTY --with-airplay-2 ja --with-pa
+# Ajetaan configure-skripti (AirPlay 2 ja PulseAudio)
 RUN ./configure \
     --prefix=/usr \
     --sysconfdir=/etc \
@@ -70,7 +53,6 @@ RUN ./configure \
     --with-sndfile \
     --with-systemd \
     --with-pi-extras \
-    # PULSEAUDIO JA AIRPLAY2 OPTIOT
     --with-pa \
     --with-airplay-2
 
@@ -82,8 +64,7 @@ RUN make -j$(nproc)
 RUN mkdir -p /build/staging
 RUN make install DESTDIR=/build/staging
 
-# Käytetään FPM:ää .deb-paketin luomiseen
-# LISÄTTY UUDET AJONAIKAISET RIIPPUVUUDET
+# Käytetään FPM:ää .deb-paketin luomiseen (armhf on Debian-termi ARMv6/v7:lle)
 RUN fpm -s dir -t deb \
     -n shairport-sync \
     -v ${PACKAGE_VERSION} \
@@ -92,7 +73,6 @@ RUN fpm -s dir -t deb \
     --description "Shairport Sync - AirPlay 2 audio player" \
     --license "MIT" \
     --url "https://github.com/mikebrady/shairport-sync" \
-    # Perusriippuvuudet
     --depends libasound2 \
     --depends libavahi-client3 \
     --depends libconfig9 \
@@ -101,7 +81,6 @@ RUN fpm -s dir -t deb \
     --depends libsoxr0 \
     --depends libssl1.1 \
     --depends adduser \
-    # PulseAudio ja Airplay2 riippuvuudet
     --depends libpulse0 \
     --depends libplist3 \
     --depends libsodium23 \
