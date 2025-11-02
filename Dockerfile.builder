@@ -1,15 +1,23 @@
-# ----- VAIHE 1: Rakennusympäristö (ARMv6hf Build) -----
-# Käytetään Balenan RPi Zero W:n (ARMv6hf) Build-imagea.
-# Tämä image sisältää kaikki kehitystyökalut, mikä ratkaisee autoreconf-virheen.
-FROM balenalib/armv6hf-debian:bullseye-build AS builder 
+# ----- VAIHE 1: Rakennusympäristö (Multiarch ARMv6hf) -----
+# Käytetään julkista multiarch-imagea, joka on suunniteltu ristiin-kääntämiseen.
+# 'armhf' kattaa sekä ARMv6 (RPi Zero W) että ARMv7 arkkitehtuurit.
+FROM multiarch/debian-debootstrap:armhf-bullseye AS builder 
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PACKAGE_VERSION=0.0.0-local
 
-# Poistettiin turhat asennukset (build-essential, autoconf jne.), 
-# koska ne ovat jo 'build'-imagessa.
+# Asennetaan rakennusaikaiset riippuvuudet. 
+# Tämä image ei ole 'build' versio, joten tarvitsemme kaikki kehitystyökalut.
 RUN apt-get update && apt-get install -y \
+    build-essential \
     git \
+    autoconf \
+    automake \
+    libtool \
+    m4 \
+    gettext \
+    pkg-config \
+    # Shairport-Syncin riippuvuudet
     libpopt-dev \
     libconfig-dev \
     libasound2-dev \
