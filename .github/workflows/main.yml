@@ -33,8 +33,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.builder
-          # PALAUTETTU TÄSMÄÄN RASPBERRY PI ZERO W:N ARKKITEHTUURIIN
-          platforms: linux/arm/v6 
+          # Käytetään vakaata ARMv7-platformia, joka on yhteensopiva 'armhf' imagen kanssa.
+          platforms: linux/arm/v7
           build-args: |
             PACKAGE_VERSION=${{ steps.version.outputs.PACKAGE_VERSION }}
           tags: shairport-sync-builder:latest
