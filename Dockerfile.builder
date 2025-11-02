@@ -1,13 +1,11 @@
 # ----- VAIHE 1: Rakennusympäristö (Multiarch ARMv6hf) -----
 # Käytetään julkista multiarch-imagea, joka on suunniteltu ristiin-kääntämiseen.
-# 'armhf' kattaa sekä ARMv6 (RPi Zero W) että ARMv7 arkkitehtuurit.
 FROM multiarch/debian-debootstrap:armhf-bullseye AS builder 
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PACKAGE_VERSION=0.0.0-local
 
 # Asennetaan rakennusaikaiset riippuvuudet. 
-# Tämä image ei ole 'build' versio, joten tarvitsemme kaikki kehitystyökalut.
 RUN apt-get update && apt-get install -y \
     build-essential \
     git \
@@ -17,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     m4 \
     gettext \
     pkg-config \
+    # UUSI LISÄYS: libcap-dev tarvitaan joskus oikeuksien hallintaan
+    libcap-dev \
     # Shairport-Syncin riippuvuudet
     libpopt-dev \
     libconfig-dev \
@@ -46,10 +46,11 @@ COPY . .
 
 # ----- VAIHE 2: Kääntäminen -----
 
-# Tämä komento toimii nyt Build-imagessa
-RUN autoreconf -i -f
+# OHITETAAN EPÄLUOTETTAVA autoreconf-vaihe.
+# (Sen sijaan luotetaan, että configure-tiedosto on jo olemassa)
+# # RUN autoreconf -i -f 
 
-# Ajetaan configure-skripti (AirPlay 2 ja PulseAudio)
+# Ajetaan configure-skripti suoraan.
 RUN ./configure \
     --prefix=/usr \
     --sysconfdir=/etc \
