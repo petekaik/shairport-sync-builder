@@ -2,7 +2,10 @@
 # Käytetään Balenan RPi Zero -yhteensopivaa (armv6) Bullseye-imagea
 # FROM balenalib/raspberry-pi-zero-debian:bullseye AS builder
 # Käytetään Balenan yleistä ARMv6hf (Raspberry Pi Zero) -pohjaista Debian-imagea
-FROM balenalib/armv6hf-debian:bullseye AS builder
+# FROM balenalib/armv6hf-debian:bullseye AS builder
+# Käytetään virallista Balena Universal Base Imagea (UBI) ARMv6hf-arkkitehtuurille
+# Tämä on vakain julkinen polku Debian Bullseyelle RPi Zero W:tä varten.
+FROM balenalib/aarch64-debian:bullseye AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PACKAGE_VERSION=0.0.0-local
