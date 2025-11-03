@@ -1,11 +1,11 @@
 # ----- VAIHE 1: Rakennusympäristö (Multiarch ARMv6hf) -----
-# Käytetään julkista multiarch-imagea, joka on suunniteltu ristiin-kääntämiseen.
-FROM multiarch/debian-debootstrap:armhf-bullseye AS builder 
+# KÄYTETÄÄN VIRALLISTA DEBIAN IMAGEA
+FROM debian:bullseye AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PACKAGE_VERSION=0.0.0-local
 
-# Asennetaan rakennusaikaiset riippuvuudet. 
+# Asennetaan KAIKKI rakennusaikaiset riippuvuudet. 
 RUN apt-get update && apt-get install -y \
     build-essential \
     git \
@@ -15,10 +15,9 @@ RUN apt-get update && apt-get install -y \
     m4 \
     gettext \
     pkg-config \
-    # UUSI LISÄYS: libcap-dev tarvitaan joskus oikeuksien hallintaan
     libcap-dev \
-    # UUSI LISÄYS: Usein puuttuva riippuvuus autoreconf-prosesseissa
-    libglib2.0-dev \
+    # Autoreconf-vakauden varmistamiseksi
+    libglib2.0-dev \ 
     # Shairport-Syncin riippuvuudet
     libpopt-dev \
     libconfig-dev \
