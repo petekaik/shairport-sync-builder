@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     # UUSI LISÄYS: libcap-dev tarvitaan joskus oikeuksien hallintaan
     libcap-dev \
+    # UUSI LISÄYS: Usein puuttuva riippuvuus autoreconf-prosesseissa
+    libglib2.0-dev \
     # Shairport-Syncin riippuvuudet
     libpopt-dev \
     libconfig-dev \
@@ -46,11 +48,8 @@ COPY . .
 
 # ----- VAIHE 2: Kääntäminen -----
 
-# OHITETAAN EPÄLUOTETTAVA autoreconf-vaihe.
-# (Sen sijaan luotetaan, että configure-tiedosto on jo olemassa)
-# # RUN autoreconf -i -f 
-# UUSI RIVI: Varmistetaan, että configure-tiedosto on olemassa ja suoritettavissa
-RUN find . -name 'configure' -print -exec chmod +x {} \;
+# PALAUTETTU: Suoritetaan autoreconf (tämä luo puuttuvan configure-tiedoston)
+RUN autoreconf -i -f
 
 # Ajetaan configure-skripti suoraan.
 RUN ./configure \
