@@ -49,6 +49,8 @@ COPY . .
 # OHITETAAN EPÄLUOTETTAVA autoreconf-vaihe.
 # (Sen sijaan luotetaan, että configure-tiedosto on jo olemassa)
 # # RUN autoreconf -i -f 
+# UUSI RIVI: Varmistetaan, että configure-tiedosto on olemassa ja suoritettavissa
+RUN find . -name 'configure' -print -exec chmod +x {} \;
 
 # Ajetaan configure-skripti suoraan.
 RUN ./configure \
