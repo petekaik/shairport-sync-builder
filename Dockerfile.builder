@@ -1,6 +1,6 @@
-# ----- VAIHE 1: Rakennusympäristö (Multiarch ARMv6hf) -----
-# KÄYTETÄÄN VIRALLISTA DEBIAN IMAGEA
-FROM debian:bullseye AS builder
+# ----- VAIHE 1: Rakennusympäristö (Yhteisön ARMv6) -----
+# Käytetään Docker Hubin arm32v6-nimiavaruuden imagea, joka tukee RPi Zero W:tä.
+FROM arm32v6/debian:bullseye AS builder 
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG PACKAGE_VERSION=0.0.0-local
@@ -16,7 +16,6 @@ RUN apt-get update && apt-get install -y \
     gettext \
     pkg-config \
     libcap-dev \
-    # Autoreconf-vakauden varmistamiseksi
     libglib2.0-dev \ 
     # Shairport-Syncin riippuvuudet
     libpopt-dev \
@@ -47,10 +46,10 @@ COPY . .
 
 # ----- VAIHE 2: Kääntäminen -----
 
-# PALAUTETTU: Suoritetaan autoreconf (tämä luo puuttuvan configure-tiedoston)
-RUN autoreconf -i -f
+# Suoritetaan autoreconf, joka nyt sisältää kaikki riippuvuudet
+RUN autoreconf -i -f 
 
-# Ajetaan configure-skripti suoraan.
+# Ajetaan configure-skripti
 RUN ./configure \
     --prefix=/usr \
     --sysconfdir=/etc \
